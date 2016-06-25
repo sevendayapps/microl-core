@@ -9,9 +9,12 @@ import com.microl.core.Cache;
 
 public class ObjectCache<K, Cacheable> implements Cache<K, Cacheable>{
 	
+	// hit counts. If the key is in the cache, means a hit has been taken
 	private Long hitCounts;
+	// miss counts. If the key is not in the cache, means a miss has been taken
 	private Long missCounts;
 	
+	// the cache
 	private Map<K, Cacheable> cache = new TreeMap<K, Cacheable>();
 	
 	public ObjectCache() {
@@ -31,17 +34,16 @@ public class ObjectCache<K, Cacheable> implements Cache<K, Cacheable>{
 	@Override
 	public Cacheable get(K key) {
 		if(isExisted(key)) {
-			hitCounts++;
+			incrementHitCounts();
 			return cache.get(key);
 		}
 		
-		missCounts++;
+		incrementMissCounts();
 		return null;
 	}
 
 	@Override
 	public void put(K key, Cacheable value) throws InvalidActivityException {
-		missCounts++;
 		cache.put(key, value);
 	}
 
@@ -56,6 +58,21 @@ public class ObjectCache<K, Cacheable> implements Cache<K, Cacheable>{
 		}
 		
 		return Double.valueOf(0D);
+	}
+	
+	@Override
+	public void refresh() {
+			
+	}
+	
+	@Override
+	public void incrementHitCounts() {
+		hitCounts++;
+	}
+
+	@Override
+	public void incrementMissCounts() {
+		missCounts++;
 	}
 
 	public Long getHitCounts() {
@@ -81,4 +98,6 @@ public class ObjectCache<K, Cacheable> implements Cache<K, Cacheable>{
 	public void setCache(Map<K, Cacheable> cache) {
 		this.cache = cache;
 	}
+
+	
 }

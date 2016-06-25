@@ -5,16 +5,21 @@ import java.util.Map;
 
 import com.microl.core.LinkedNode;
 
-public class LRUBasedCache<K, Cacheable> extends ObjectCache<K, Cacheable>{
+public class LRUCache_VietLK<K, Cacheable> extends ObjectCache<K, Cacheable>{
 	
+	// the linked list
 	private Map<K, LinkedNode<K>> lruController = new HashMap<K, LinkedNode<K>>();
-	private LinkedNode<K> head;
-	private LinkedNode<K> end;
+	// first node of the linked list
+	private LinkedNode<K> firstNode;
+	// end node of the linked list
+	private LinkedNode<K> lastNode;
 	
+	// the maximum size of the cache
 	private Integer capacity;
+	// the cache
 	private Map<K, Cacheable> cache;
 	
-	public LRUBasedCache(Integer capacity) {
+	public LRUCache_VietLK(Integer capacity) {
 		this.capacity = capacity;
 	}
 	
@@ -38,9 +43,9 @@ public class LRUBasedCache<K, Cacheable> extends ObjectCache<K, Cacheable>{
 		LinkedNode<K> newNode = new LinkedNode<K>(key);
 		
 		if(cache.size() >= capacity) {
-			K lruKey = (K) end.getValue();
+			K lruKey = (K) lastNode.getValue();
 			cache.remove(lruKey);
-			remove(end);
+			remove(lastNode);
 		} 
 
 		setHead(newNode);
@@ -48,35 +53,36 @@ public class LRUBasedCache<K, Cacheable> extends ObjectCache<K, Cacheable>{
 	}
 	
 	private synchronized void remove(LinkedNode<K> node) {
-		// if current node have a prev node, set next node of previous node to next node of current code
-		// if current node is the first node, set head is the next node of current code.
+		// example : node 1 -> node 2 -> node 3
+		// if current node is node 2 -> set next of node 1 is node 3 and set previous of node 3 is node 1.
+		// if current node is node 1 (first node) -> set first node to node 2 and set previous of node 2 is null. 
+		// if current node is node 3 (last node) -> set last node is node 2 and set next of node 2 is null.
+
 		if(node.getPrev() != null) {
 			node.getPrev().setNext(node.getNext());
 		} else {
-			head = node.getNext();
+			firstNode = node.getNext();
 		}
 		
-		// if current node have a next node, set previous of the next node of current node is previous of current node
-		// if current node is the last node, set end is the previous node of current node
 		if(node.getNext() != null) {
 			node.getNext().setPrev(node.getPrev());
 		} else {
-			end = node.getPrev();
+			lastNode = node.getPrev();
 		}
 	}
 	
 	private synchronized void setHead(LinkedNode<K> node) {
-		node.setNext(head);
+		node.setNext(firstNode);
 		node.setPrev(null);
 		
-		if(head != null) {
-			head.setPrev(node);
+		if(firstNode != null) {
+			firstNode.setPrev(node);
 		}
 		
-		head = node;
+		firstNode = node;
 		
-		if(end == null) {
-			end = head;
+		if(lastNode == null) {
+			lastNode = lastNode;
 		}
 	}
 	
